@@ -101,3 +101,51 @@ func TestRun(t *testing.T) {
 		}
 	}
 }
+
+func TestConditionalExpression(t *testing.T) {
+	testFrags := []struct {
+		input         string
+		expect        bool
+		expectIsError bool
+	}{
+		{"", false, true},
+		{"invalid", false, true},
+		{"1.0", false, true},
+		{"1<2", true, false},
+		{"1>2", false, false},
+		{"1=2", false, false},
+		{"1<=1", true, false},
+		{"1>=1", true, false},
+		{"1 = 1", true, false},
+		{"1 = 2", false, false},
+		{"1.1=1.1", true, false},
+		{"1.1=2.1", false, false},
+		{"1+2=3", true, false},
+		{"2+2=3", false, false},
+		{"1+7=3+5", true, false},
+		{"2+2=3+4", false, false},
+		{"12=3*4", true, false},
+	}
+
+	for _, f := range testFrags {
+		result, err := calc.ConditionalExpression(f.input)
+
+		if err != nil != f.expectIsError {
+			if err != nil {
+				t.Errorf("Run should not return error.\nInput: %s\nError Message: %s",
+					f.input, err.Error())
+			}
+
+			if err == nil {
+				t.Errorf("Run should return error.\nInput: %s", f.input)
+			}
+		}
+
+		if err == nil {
+			if result != f.expect {
+				t.Errorf("Run return value is mismatch.\nInput: %s\nExpect: %f\nActual: %f",
+					f.input, f.expect, result)
+			}
+		}
+	}
+}

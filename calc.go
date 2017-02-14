@@ -18,6 +18,7 @@ import (
 var trimSpace = regexp.MustCompile(`[ ]`)
 var checkRegExp = regexp.MustCompile(`^[+\-]?\d+(?:\.\d+)?(?:[+\-*/]\d+(?:\.\d+)?)*$`)
 var singleOperandRegExp = regexp.MustCompile(`([+\-*/])?(\d+(?:\.\d+)?)`)
+var checkConditionalRexExp = regexp.MustCompile(`^([+\-]?\d+(?:\.\d+)?(?:[+\-*/]\d+(?:\.\d+)?)*)(<|>|=|<=|>=)([+\-]?\d+(?:\.\d+)?(?:[+\-*/]\d+(?:\.\d+)?)*)$`)
 
 type expression struct {
 }
@@ -31,7 +32,7 @@ type block struct {
 // Return value type is float64.
 func Run(expression string) (float64, error) {
 
-	expression = trimSpace.ReplaceAllString(expression, "")
+	expression = trimAllSpace(expression)
 
 	if !checkRegExp.MatchString(expression) {
 		return 0.0, errors.New("not match expression")
@@ -162,4 +163,38 @@ func calc(operand1 float64, operator string, operand2 float64) (float64, error) 
 	}
 
 	return 0.0, errors.New("Invalid operator")
+}
+
+func trimAllSpace(s string) string {
+	return trimSpace.ReplaceAllString(s, "")
+}
+
+// ConditionalExpression returns about it is collect condition.
+// When input invalid condition, return false and error object.
+func ConditionalExpression(expression string) (bool, error) {
+	expression = trimAllSpace(expression)
+	targetArray := checkConditionalRexExp.FindAllStringSubmatch(expression, -1)
+	if targetArray == nil {
+		return false, errors.New("Invalid experssion")
+	}
+
+	target := targetArray[0]
+
+	value1, _ := Run(target[1])
+	value2, _ := Run(target[3])
+
+	switch target[2] {
+	case "=":
+		return value1 == value2, nil
+	case "<":
+		return value1 < value2, nil
+	case ">":
+		return value1 > value2, nil
+	case "<=":
+		return value1 <= value2, nil
+	case ">=":
+		return value1 >= value2, nil
+	}
+
+	return false, errors.New("only allow =, <, >, <=,and >=")
 }
