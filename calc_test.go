@@ -143,7 +143,7 @@ func TestConditionalExpression(t *testing.T) {
 
 		if err == nil {
 			if result != f.expect {
-				t.Errorf("Run return value is mismatch.\nInput: %s\nExpect: %f\nActual: %f",
+				t.Errorf("Run return value is mismatch.\nInput: %s\nExpect: %t\nActual: %t",
 					f.input, f.expect, result)
 			}
 		}
